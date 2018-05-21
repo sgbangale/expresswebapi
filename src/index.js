@@ -7,7 +7,8 @@ var morgan = require('morgan');
 var mongoose = require('mongoose');
 var accoountRoutes = require('./routes/accountRoute'),
 pipelineRoute = require('./routes/pipelineRoute'),
-shared = require('../src/common/shared');
+shared = require('../src/common/shared'),
+auth = require('../src/middleware/auth');
 
 var app = express();
 mongoose.connect(process.env.mongocs);
@@ -17,7 +18,9 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 app.use(morgan('dev'));
-app.get('/master',shared.initMasterData);
+app.post('/master',shared.initMasterData);
+app.get('/master',auth(),shared.prepareMasterData);
+app.post('/role', shared.createRole);
 app.use('/account', accoountRoutes);
  app.use('/request', pipelineRoute);
 app.get('/', function (req, res) {
