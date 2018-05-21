@@ -1,28 +1,44 @@
-var jwt = require('jsonwebtoken');
+var jwt = require('jsonwebtoken'),
+  role = require('../models/role');
 
-  module.exports =
-  function auth(rolecode,roleaccess) {
+module.exports =
+  function auth() {
 
     return function (req, res, next) {
       var token = req.body.token || req.query.token || req.headers['token'];
+      var request_type = req.query.request_type;
       if (token) {
         jwt.verify(token, process.env.SECRET, function (err, decoded) {
-          if (err) {
-            console.log(err);
-            return res.json({ success: false, message: 'Failed to authenticate token.' });
+          if (err) {        
+            return res.json({
+              success: false,
+              message: 'Failed to authenticate token.'
+            });
           } else {
-            if (decoded) { //-1 != decoded.Role.roleaccess.indexOf(roleaccess) ||-1!=rolecode.indexOf(decoded.Role.rolecode) 
-              req.decoded = decoded;
-              next();
-            }
-            else {
-              return res.status(403).send({
-
-                success: false,
-                message: 'Authorization is failed. User dont have sufficient rights.'
-              });
-            }
+        
+            role.findOne({
+              roleCode: decoded.Role
+            }, function (e, role) {
+              if (e) {
+                return res.status(403).send({
+                  success: false,
+                  message: 'Authorization is failed. role dont have '
+                });
+              }
+              if(role.roleAccess.indexOf(request_type) != -1 || role.roleAccess.indexOf('ALL') != -1)
+              {
+                req.decoded = decoded;
+                next();
+              }
+              else {
+                return res.status(403).send({
+                  success: false,
+                  message: 'Authorization is failed. User role dont have sufficient rights.'
+                });
+              }
+            });
           }
+
 
         });
 

@@ -10,7 +10,7 @@ router.post('/', function (req, res) {
             password: req.body.Password,
             firstName: req.body.FirstName,
             lastName: req.body.LastName,
-            role: req.body.Role
+            role: req.body.Role.toLowerCase()
         },
         function (err, user) {
             if (err) return res.status(500).send("There was a problem adding the information to the database." + JSON.stringify(err));
@@ -43,7 +43,8 @@ router.post('/token', function (req, res) {
                         return res.status(200).send({
                             success: true,
                             message: 'Put this token in subsequent request add in header Authorization <token>',
-                            token: token
+                            token: token,
+                            user : user
                         });
 
 

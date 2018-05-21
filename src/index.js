@@ -6,7 +6,8 @@ var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var mongoose = require('mongoose');
 var accoountRoutes = require('./routes/accountRoute'),
-pipelineRoute = require('./routes/pipelineRoute');
+pipelineRoute = require('./routes/pipelineRoute'),
+shared = require('../src/common/shared');
 
 var app = express();
 mongoose.connect(process.env.mongocs);
@@ -16,7 +17,7 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 app.use(morgan('dev'));
-
+app.get('/master',shared.initMasterData);
 app.use('/account', accoountRoutes);
  app.use('/request', pipelineRoute);
 app.get('/', function (req, res) {
