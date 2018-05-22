@@ -3,7 +3,42 @@ var router = express.Router();
 var user = require('../models/user');
 var jwt = require('jsonwebtoken'),
     auth = require('../middleware/auth');
-
+//prepare this by user role
+var MenuItemVar = (JSON.stringify(
+    [{
+            label: 'File',
+            icon: 'fa-file-o',
+            items: [{
+                    label: this.showLogin ? 'Login' : 'Logout',
+                    icon: this.showLogin ? 'fa-sign-in' : 'fa-sign-out',
+                    routerLink: this.showLogin ? '/login' : '/logout',
+                },
+                {
+                    label: 'Open'
+                },
+                {
+                    separator: true
+                },
+                {
+                    label: 'Quit'
+                }
+            ]
+        },
+        {
+            label: 'Entities',
+            icon: 'fa-edit',
+            items: [{
+                    label: 'Undo',
+                    icon: 'fa-mail-forward'
+                },
+                {
+                    label: 'Redo',
+                    icon: 'fa-mail-reply'
+                }
+            ]
+        }
+    ]
+));
 router.post('/', function (req, res) {
     user.create({
             emailAddress: req.body.EmailAddress,
@@ -27,9 +62,11 @@ router.post('/token', function (req, res) {
             return res.status(200).send('invalid email address or password.[error in finding user]');
         } else {
             if (user) {
-                user.comparePassword(req.body.Password, function (ismatch) {
+                   //user.comparePassword(Buffer.from(req.body.Password, 'base64').toString('ascii'), function (ismatch) {
+                    user.comparePassword(req.body.Password, function (ismatch) {
                     if (ismatch) {
-                        console.log(user);
+                        var issuedTime = Date.now();
+
                         var token = jwt.sign({
                             User: {
                                 EmailAddress: user.emailAddress,
@@ -37,59 +74,22 @@ router.post('/token', function (req, res) {
                                 LastName: user.lastName,
                                 Id: user._id
                             },
-                            Role: user.role
-                        }, process.env.SECRET, {
-                            expiresIn: process.env.TOKEN_TIME_EXPIRE_IN_SECOND
-                        });
-
-                        var MenuItemVar =(JSON.stringify(
-                            [{
-                                label: 'File',
-                                icon: 'fa-file-o',
-                                items: [{
-                                    label: this.showLogin ? 'Login' : 'Logout',
-                                    icon: this.showLogin ? 'fa-sign-in' : 'fa-sign-out',
-                                    routerLink: this.showLogin ? '/login' : '/logout',
-                                  },
-                                  {
-                                    label: 'Open'
-                                  },
-                                  {
-                                    separator: true
-                                  },
-                                  {
-                                    label: 'Quit'
-                                  }
-                                ]
-                              },
-                              {
-                                label: 'Entities',
-                                icon: 'fa-edit',
-                                items: [{
-                                    label: 'Undo',
-                                    icon: 'fa-mail-forward'
-                                  },
-                                  {
-                                    label: 'Redo',
-                                    icon: 'fa-mail-reply'
-                                  }
-                                ]
-                              }
-                            ]
-                        ));
-
+                            Role: user.role,
+                            iat: Math.floor(Date.now() / 1000),
+                            exp: Math.floor(((Date.now() / 1000) + Number.parseInt(process.env.TOKEN_TIME_EXPIRE_IN_SECOND)))
+                        }, process.env.SECRET);
+                        var t = new Date();
+                        t.setSeconds(t.getSeconds() + 10);
                         return res.status(200).send({
                             success: true,
-                            message: 'Put this token in subsequent request add in header Authorization <token>',
+                            message: 'Put this token in subsequent request add in header token <token>',
                             token: token,
                             FirstName: user.firstName,
-                            LastName:user.lastName,
-                            MenuItem :Buffer.from(MenuItemVar).toString('base64')
-
-
+                            LastName: user.lastName,
+                            MenuItem: Buffer.from(MenuItemVar).toString('base64'),
+                            iat: Math.floor(Date.now() / 1000),
+                            exp: Math.floor(((Date.now() / 1000) + Number.parseInt(process.env.TOKEN_TIME_EXPIRE_IN_SECOND)))
                         });
-
-
                     } else {
                         return res.status(200).send('invalid email address or password.[password is not match]');
                     }
@@ -151,12 +151,12 @@ router.get('/', auth('ADMIN'), function (req, res) {
         } else {
             if (users) {
                 return res.status(200).send(users.map(x => {
-                   return {
+                    return {
                         "_id": x._id,
                         "emailAddress": x.emailAddress,
                         "firstName": x.firstName,
                         "lastName": x.lastName,
-                        "role":x.role
+                        "role": x.role
                     }
                 }));
             }
