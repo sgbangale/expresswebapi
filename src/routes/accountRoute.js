@@ -19,6 +19,7 @@ router.post('/', function (req, res) {
         });
 });
 router.post('/token', function (req, res) {
+    console.log(req.body);
     user.findOne({
         emailAddress: req.body.EmailAddress
     }, function (e, user) {
@@ -40,11 +41,52 @@ router.post('/token', function (req, res) {
                         }, process.env.SECRET, {
                             expiresIn: process.env.TOKEN_TIME_EXPIRE_IN_SECOND
                         });
+
+                        var MenuItemVar =(JSON.stringify(
+                            [{
+                                label: 'File',
+                                icon: 'fa-file-o',
+                                items: [{
+                                    label: this.showLogin ? 'Login' : 'Logout',
+                                    icon: this.showLogin ? 'fa-sign-in' : 'fa-sign-out',
+                                    routerLink: this.showLogin ? '/login' : '/logout',
+                                  },
+                                  {
+                                    label: 'Open'
+                                  },
+                                  {
+                                    separator: true
+                                  },
+                                  {
+                                    label: 'Quit'
+                                  }
+                                ]
+                              },
+                              {
+                                label: 'Entities',
+                                icon: 'fa-edit',
+                                items: [{
+                                    label: 'Undo',
+                                    icon: 'fa-mail-forward'
+                                  },
+                                  {
+                                    label: 'Redo',
+                                    icon: 'fa-mail-reply'
+                                  }
+                                ]
+                              }
+                            ]
+                        ));
+
                         return res.status(200).send({
                             success: true,
                             message: 'Put this token in subsequent request add in header Authorization <token>',
                             token: token,
-                            user : user
+                            FirstName: user.firstName,
+                            LastName:user.lastName,
+                            MenuItem :Buffer.from(MenuItemVar).toString('base64')
+
+
                         });
 
 

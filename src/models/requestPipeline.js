@@ -1,10 +1,10 @@
 var mongoose = require('mongoose'),
     bcrypt = require('bcrypt');
 var RequestPipelineSchema = mongoose.Schema({
-    request_type:{
-        type:String,
-        lowercase:true,
-        trim:true,
+    request_type: {
+        type: String,
+        lowercase: true,
+        trim: true,
         required: true
     },
     request_intiator: {
@@ -14,10 +14,9 @@ var RequestPipelineSchema = mongoose.Schema({
     },
     request_data: {
         type: Object
-        
+
     },
-    request_api_url:
-    {
+    request_api_url: {
         type: String
     },
     request_created_date: {
@@ -32,8 +31,11 @@ var RequestPipelineSchema = mongoose.Schema({
     request_callback_url: {
         type: String
     },
-    request_comments:{
-        type:String
+    request_output_data: {
+        type: Object
+    },
+    request_comments: {
+        type: String
     }
 });
 

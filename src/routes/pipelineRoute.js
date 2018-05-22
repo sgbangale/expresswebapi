@@ -7,19 +7,19 @@ share= require('../common/shared');
 
 router.post('/',auth(), function (req, res) {
     pipeline.create({
-        request_type:req.param.request_type,
+        request_type:req.query.request_type,
         request_intiator : req.decoded.User.EmailAddress,
-        request_data : req.body,
+        request_data : req.body.request_data,
         request_api_url : req.originalUrl,
         request_created_date : Date.now(),
         request_status:'CREATED',
         request_callback_url :req.originalUrl,
-        request_comments:req.header['request_comments']
+        request_comments:req.headers['request_comments']
         },
         function (err, item) {
             if (err) return res.status(500).send("There was a problem adding the information to the database." + JSON.stringify(err));
-            share.pipelineResolver(req,res)
-            res.status(200).send(item);
+            share.pipelineResolver(req,res,item);
+            
         });
 });
 
