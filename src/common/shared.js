@@ -3,7 +3,7 @@ var role = require('../models/role'),
     pipeline = require('../models/requestPipeline');
 
 module.exports = {
-    pipelineResolver: function (req, res, pipelineObject) {
+    pipelineResolver: function (req, res, pipelineObject,isViewReq) {
         
         if (factory[pipelineObject.request_type] != undefined) {
            var result = factory[pipelineObject.request_type](pipelineObject.request_data);
@@ -11,6 +11,7 @@ module.exports = {
                 pipelineObject.request_completion_date = Date.now();
                 pipelineObject.request_status = "COMPLETE";
                 pipelineObject.request_output_data = item;
+                if(!isViewReq)
                 pipeline.update({
                     _id: pipelineObject._id
                 }, pipelineObject, (er, su) => {
@@ -28,11 +29,18 @@ module.exports = {
                     });
 
                 });
+                else
+                return res.status(200).send({
+                    success: true,
+                    message: 'Operation is completed successfully.',
+                    operation_data: pipelineObject
+                });
 
             }).catch(e => {
                 pipelineObject.request_completion_date = Date.now();
                 pipelineObject.request_status = "FAILED";
                 pipelineObject.request_output_data = e;
+                if(!isViewReq)
                 pipeline.update({
                     _id: pipelineObject._id
                 }, pipelineObject, (er, su) => {
@@ -51,33 +59,16 @@ module.exports = {
                     });
 
                 });
-            });
-        }
-        else
-        {
-            pipelineObject.request_completion_date = Date.now();
-            pipelineObject.request_status = "FAILED";
-            pipelineObject.request_output_data = {message:"invalid operation"};
-            pipeline.update({
-                _id: pipelineObject._id
-            }, pipelineObject, (er, su) => {
-                if (er)
-                    return res.status(200).send({
-                        success: false,
-                        message: 'no operation configured',
-                        error_code: '[error occurred while performing inline request and error occured while updating request status.]',
-                        operation_data: pipelineObject
-                    });
+                else
                 return res.status(200).send({
                     success: false,
-                    message: 'no operation configured',
+                    message: 'Operation is failed.',
                     error_code: '[error ocurred while performing request but request is updated.]',
                     operation_data: pipelineObject
                 });
 
             });
         }
-
     },
     createRole: function (req, res) {
         console.log(req.body);
