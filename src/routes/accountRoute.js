@@ -3,7 +3,96 @@ var router = express.Router();
 var user = require('../models/user');
 var jwt = require('jsonwebtoken'),
     auth = require('../middleware/auth');
+    
 //prepare this by user role
+var MenuAccess = (JSON.stringify(
+
+    [{
+            view: [
+                {
+                    field: "request_type",
+                    header: "request_type"
+                },
+                {
+                    field: "request_intiator",
+                    header: "request_intiator"
+                },
+                {
+                    field: "request_data",
+                    header: "request_data"
+                },
+                {
+                    field: "request_status",
+                    header: "request_status"
+                },
+                {
+                    field: "request_output_data",
+                    header: "request_output_data"
+                }
+            ],
+            actionCode: 'requests',
+            actionItems: [{
+                    ActionCode: "request__view",
+                    ActionName: "Add New User",
+                    MultiSelect: true,
+                    Icon: 'fa-plus'
+                },
+                // {ActionCode:"request__add",ActionName:"Add New User" ,MultiSelect:true,Icon:'fa-plus'},
+                {
+                    ActionCode: "request__edit",
+                    ActionName: "Edit User",
+                    MultiSelect: false,
+                    Icon: 'fa-edit'
+                },
+                {
+                    ActionCode: "request__delete",
+                    ActionName: "Remove User",
+                    MultiSelect: true,
+                    Icon: 'fa-trash'
+                },
+            ]
+        },
+        {
+            view: [{
+                    field: "emailAddress",
+                    header: "Email Address"
+                },
+                {
+                    field: "role",
+                    header: "Role"
+                }, {
+                    field: "firstName",
+                    header: "First Name"
+                }, {
+                    field: "lastName",
+                    header: "Last Name"
+                }
+            ],
+            actionCode: 'user',
+            actionItems: [{
+                    ActionCode: "user__add",
+                    ActionName: "Add New User",
+                    MultiSelect: true,
+                    Icon: 'fa-plus'
+                },
+                {
+                    ActionCode: "user__edit",
+                    ActionName: "Edit User",
+                    MultiSelect: false,
+                    Icon: 'fa-edit'
+                },
+                {
+                    ActionCode: "user__delete",
+                    ActionName: "Remove User",
+                    MultiSelect: true,
+                    Icon: 'fa-trash'
+                },
+            ]
+        },
+    ]
+
+
+));
 var MenuItemVar = (JSON.stringify(
     [{
             label: 'File',
@@ -28,12 +117,14 @@ var MenuItemVar = (JSON.stringify(
             label: 'Entities',
             icon: 'fa-edit',
             items: [{
-                    label: 'Undo',
-                    icon: 'fa-mail-forward'
+                    label: 'Requests',
+                    icon: 'fas fa-angle-double-right',
+                    routerLink: 'requests',
                 },
                 {
-                    label: 'Redo',
-                    icon: 'fa-mail-reply'
+                    label: 'Users',
+                    icon: 'fas fa-users',
+                    routerLink: 'users'
                 }
             ]
         }
@@ -48,22 +139,27 @@ router.post('/', function (req, res) {
             role: req.body.Role.toLowerCase()
         },
         function (err, user) {
-            if (err) return res.status(500).send("There was a problem adding the information to the database." + JSON.stringify(err));
+            if (err) return res.status(500).send({
+                success: false,
+                message: "There was a problem adding the information to the database." + JSON.stringify(err)
+            });
 
             res.status(200).send(user);
         });
 });
-router.post('/token', function (req, res) {
-    console.log(req.body);
+router.post('/token', function (req, res) {    
     user.findOne({
         emailAddress: req.body.EmailAddress
     }, function (e, user) {
         if (e) {
-            return res.status(200).send('invalid email address or password.[error in finding user]');
+            return res.status(200).send({
+                success: false,
+                message: 'invalid email address or password.[error in finding user]'
+            });
         } else {
             if (user) {
-                   //user.comparePassword(Buffer.from(req.body.Password, 'base64').toString('ascii'), function (ismatch) {
-                    user.comparePassword(req.body.Password, function (ismatch) {
+                //user.comparePassword(Buffer.from(req.body.Password, 'base64').toString('ascii'), function (ismatch) {
+                user.comparePassword(req.body.Password, function (ismatch) {
                     if (ismatch) {
                         var issuedTime = Date.now();
 
@@ -78,8 +174,6 @@ router.post('/token', function (req, res) {
                             iat: Math.floor(Date.now() / 1000),
                             exp: Math.floor(((Date.now() / 1000) + Number.parseInt(process.env.TOKEN_TIME_EXPIRE_IN_SECOND)))
                         }, process.env.SECRET);
-                        var t = new Date();
-                        t.setSeconds(t.getSeconds() + 10);
                         return res.status(200).send({
                             success: true,
                             message: 'Put this token in subsequent request add in header token <token>',
@@ -87,16 +181,23 @@ router.post('/token', function (req, res) {
                             FirstName: user.firstName,
                             LastName: user.lastName,
                             MenuItem: Buffer.from(MenuItemVar).toString('base64'),
+                            MenuAccess: Buffer.from(MenuAccess).toString('base64'),
                             iat: Math.floor(Date.now() / 1000),
                             exp: Math.floor(((Date.now() / 1000) + Number.parseInt(process.env.TOKEN_TIME_EXPIRE_IN_SECOND)))
                         });
                     } else {
-                        return res.status(200).send('invalid email address or password.[password is not match]');
+                        return res.status(200).send({
+                            success: false,
+                            message: 'invalid email address or password.[password is not match]'
+                        });
                     }
 
                 });
             } else {
-                return res.status(200).send('invalid email address or password.[user is not found]');
+                return res.status(200).send({
+                    success: false,
+                    message: 'invalid email address or password.[user is not found]'
+                });
             }
         }
     });
