@@ -1,5 +1,5 @@
-var dotenv = require('dotenv');
-dotenv.load();
+// var dotenv = require('dotenv');
+// dotenv.load();
 
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -11,7 +11,8 @@ shared = require('../src/common/shared'),
 auth = require('../src/middleware/auth');
 
 var app = express();
-mongoose.connect(process.env.mongocs);
+//mongoose.connect(process.env.mongocs);
+mongoose.connect('mongodb://dbuser:dbuser@ds119081.mlab.com:19081/graphql-compose-mongoose');
 app.disable('x-powered-by');
 app.use(bodyParser.urlencoded({
     extended: false
@@ -33,8 +34,8 @@ app.get('/', function (req, res) {
     res.send('Hello World!');
 });
 
-var port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
-ip   =  process.env.OPENSHIFT_NODEJS_IP || "0.0.0.0";
+var port =  8080;
+ip   =    "0.0.0.0";
 
 app.listen(port, ip,function(){
     console.log('Server running (***) on http://%s:%s', ip, port);
