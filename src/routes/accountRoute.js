@@ -89,6 +89,43 @@ var MenuAccess = (JSON.stringify(
                 },
             ]
         },
+        {
+            view: [{
+                    field: "entity_code",
+                    header: "entity_code"
+                },
+                {
+                    field: "entity_name",
+                    header: "entity_name"
+                }, {
+                    field: "entity_access",
+                    header: "entity_access"
+                }, {
+                    field: "entity_active",
+                    header: "entity_active"
+                }
+            ],
+            actionCode: 'entity',
+            actionItems: [{
+                    ActionCode: "entity__add",
+                    ActionName: "Add New Entity",
+                    MultiSelect: true,
+                    Icon: 'fa-plus'
+                },
+                {
+                    ActionCode: "entity__edit",
+                    ActionName: "Edit Entity",
+                    MultiSelect: false,
+                    Icon: 'fa-edit'
+                },
+                {
+                    ActionCode: "entity__delete",
+                    ActionName: "Remove Entity",
+                    MultiSelect: true,
+                    Icon: 'fa-trash'
+                },
+            ]
+        },
     ]
 
 
@@ -114,18 +151,27 @@ var MenuItemVar = (JSON.stringify(
             ]
         },
         {
-            label: 'Entities',
+            label: 'Admin Operations',
             icon: 'fa-edit',
-            items: [{
+            items: [
+                {
+                    label: 'Entities',
+                    icon: 'fas fa-cogs',
+                    routerLink: 'entities'
+                },
+                {
                     label: 'Requests',
                     icon: 'fas fa-angle-double-right',
                     routerLink: 'requests',
                 },
+
                 {
+
                     label: 'Users',
                     icon: 'fas fa-users',
                     routerLink: 'users'
                 }
+
             ]
         }
     ]

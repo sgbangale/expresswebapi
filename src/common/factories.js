@@ -1,9 +1,23 @@
 var role = require('../models/role'),
 user = require('../models/user'),
+entity = require('../models/entity'),
 request = require('../models/requestPipeline');
 module.exports = {
 
 
+    entity__add: function(item)
+    {
+        return entity.create({
+            entity_code: item.entity_code,
+            entity_name: item.entity_name,
+            entity_access: item.entity_access,
+            entity_active: item.entity_active
+        });
+    },
+    entity__view : function(condition)
+    {
+        return entity.where(condition).exec();
+    },
     role__add : function(item)
     {
         return role.create({
