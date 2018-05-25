@@ -2,7 +2,7 @@
   "name": "webapi-express",
   "version": "1.0.0",
   "description": "webapi for angular app ",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "start" : "node src/index.js",
     "dev":"nodemon src/index.js"
