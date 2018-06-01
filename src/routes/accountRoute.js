@@ -30,7 +30,7 @@ var MenuAccess = (JSON.stringify(
                     header: "request_output_data"
                 }
             ],
-            actionCode: 'requests',
+            actionCode: 'request',
             actionItems: [{
                     ActionCode: "request__view",
                     ActionName: "Add New User",
