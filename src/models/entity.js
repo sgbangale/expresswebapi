@@ -1,6 +1,5 @@
 var mongoose = require('mongoose');
-    
-var EntitySchema = mongoose.Schema({
+mongoose.model('Entity', mongoose.Schema({
     entity_code: {
         type: String,
         unique: true,
@@ -14,11 +13,11 @@ var EntitySchema = mongoose.Schema({
     entity_access: {
         type: [String]
     },
-    entity_active:{
-        type : Boolean
+    entity_active: {
+        type: Boolean
+    },
+    entity_schema: {
+        type:mongoose.Schema.Types.Mixed
     }
-});
-
-
-mongoose.model('Entity', EntitySchema);
+}));
 module.exports = mongoose.model('Entity');

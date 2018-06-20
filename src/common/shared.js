@@ -4,8 +4,8 @@ var role = require('../models/role'),
 
 module.exports = {
     pipelineResolver: function (req, res, pipelineObject,isViewReq) {
-        
         if (factory[pipelineObject.request_type] != undefined) {
+
            var result = factory[pipelineObject.request_type](pipelineObject.request_data);
             return result.then(item => {
                 pipelineObject.request_completion_date = Date.now();
@@ -62,7 +62,7 @@ module.exports = {
                 else
                 return res.status(200).send({
                     success: false,
-                    message: 'Operation is failed.',
+                    message: 'Operation is failedqqq.',
                     error_code: '[error ocurred while performing request but request is updated.]',
                     operation_data: pipelineObject
                 });

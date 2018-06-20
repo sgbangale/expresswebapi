@@ -12,7 +12,6 @@ auth = require('../src/middleware/auth');
 
 var app = express();
 mongoose.connect(process.env.MONGOCS);
-//mongoose.connect('mongodb://dbuser:dbuser@ds119081.mlab.com:19081/graphql-compose-mongoose');
 app.disable('x-powered-by');
 app.use(bodyParser.urlencoded({
     extended: false
