@@ -9,7 +9,6 @@ module.exports =
       var request_type = req.query.request_type;
       if (token) {
         jwt.verify(token, process.env.SECRET, function (err, decoded) {
-          console.log(err);
           if (err) {        
             return res.json({
               success: false,

@@ -1,5 +1,4 @@
 var role = require('../models/role'),
-    user = require('../models/user'),
     entity = require('../models/entity'),
     request = require('../models/requestPipeline'),
     mongoose = require('mongoose'),
@@ -8,6 +7,10 @@ var sharedFunctions = {
     entity__generateFile: function (entityData) {
         var schemaData = JSON.stringify(entityData.entity_schema)
             .replace(/"String"/g, 'String')
+            .replace(/"Date"/g, 'Date')
+            .replace(/"Number"/g, 'Number')
+            .replace(/"Boolean"/g, 'Boolean')
+            .replace(/"Boolean"/g, 'Boolean')
             .replace(/"Mixed"/g, 'mongoose.Schema.Types.Mixed')
             .replace(/""/g, ' ');
         var data =
@@ -15,16 +18,15 @@ var sharedFunctions = {
         mongoose.model('` + entityData.entity_code + `', mongoose.Schema(` + schemaData + `));
         module.exports = mongoose.model('` + entityData.entity_code + `');
         `;
-        console.log(data);
         return data;
+    },
+    entity__generateBAL(entityData) {
+
     }
 };
 module.exports = {
-
-    data__view: function (condition) {
-
-        var entity = require('../models/data');
-        entity.create({data_code:'sdasda asd asd sadas'})
+    data__view: function (condition, entityName) {
+        var entity = require('../business/' + entityName);
         var viewPromise = new Promise(
             function (resolve, reject) {
                 if (condition)
@@ -59,10 +61,7 @@ module.exports = {
         );
         return viewPromise;
     },
-
     entity__add: function (item) {
-
-        // mongoose.model(res.entity_code, mongoose.Schema(res.entity_schema));
         var viewPromise = new Promise(
             function (resolve, reject) {
                 entity.create({
@@ -77,26 +76,25 @@ module.exports = {
                     } else {
 
                         var fileContent = sharedFunctions.entity__generateFile(entityData);
-                        console.log(fileContent);
-                        fs.writeFile("src/models/business/" + entityData.entity_code + '.js', fileContent, (err) => {
-                            if (err) throw err;
-                            console.log(fileContent);
-                            console.log('The file has been saved!');
-                            resolve(fileContent);
+                        fs.writeFile("src/business/" + entityData.entity_code + '.js', fileContent, (err) => {
+                            if (err) reject(err);
+                            else
+                            {
+                                entityData.entity_access.forEach(function (accessData) {
+                                    fs.writeFile("src/business/" + accessData.access_code + '.js', accessData.access_function, (err) => {
+                                        if (err) reject(err);
+                                    });
+                                });
+                                resolve(entityData);
+                            }
                         });
-
-
                     }
-
                 });
-
-
             });
         return viewPromise;
     },
     entity__view: function (condition) {
-
-        var entity = require('../models/data11');
+        var entity = require('../models/entity');
         var viewPromise = new Promise(
             function (resolve, reject) {
                 if (condition)

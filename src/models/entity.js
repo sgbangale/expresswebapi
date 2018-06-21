@@ -11,7 +11,7 @@ mongoose.model('Entity', mongoose.Schema({
         trim: true
     },
     entity_access: {
-        type: [String]
+        type: [mongoose.Schema.Types.Mixed]
     },
     entity_active: {
         type: Boolean

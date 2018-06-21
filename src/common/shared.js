@@ -3,15 +3,19 @@ var role = require('../models/role'),
     pipeline = require('../models/requestPipeline');
 
 module.exports = {
-    pipelineResolver: function (req, res, pipelineObject,isViewReq) {
-        if (factory[pipelineObject.request_type] != undefined) {
+    pipelineResolver: function (req, res, pipelineObject, isViewReq) {
 
-           var result = factory[pipelineObject.request_type](pipelineObject.request_data);
-            return result.then(item => {
-                pipelineObject.request_completion_date = Date.now();
-                pipelineObject.request_status = "COMPLETE";
-                pipelineObject.request_output_data = item;
-                if(!isViewReq)
+
+        console.log('i am here ');
+        var result = factory[pipelineObject.request_type] != undefined ?
+            factory[pipelineObject.request_type](pipelineObject.request_data,pipelineObject.request_comments) :
+            require('../business/'+pipelineObject.request_type)(pipelineObject.request_data,pipelineObject);
+            
+        return result.then(item => {
+            pipelineObject.request_completion_date = Date.now();
+            pipelineObject.request_status = "COMPLETE";
+            pipelineObject.request_output_data = item;
+            if (!isViewReq)
                 pipeline.update({
                     _id: pipelineObject._id
                 }, pipelineObject, (er, su) => {
@@ -29,18 +33,18 @@ module.exports = {
                     });
 
                 });
-                else
+            else
                 return res.status(200).send({
                     success: true,
                     message: 'Operation is completed successfully.',
                     operation_data: pipelineObject
                 });
 
-            }).catch(e => {
-                pipelineObject.request_completion_date = Date.now();
-                pipelineObject.request_status = "FAILED";
-                pipelineObject.request_output_data = e;
-                if(!isViewReq)
+        }).catch(e => {
+            pipelineObject.request_completion_date = Date.now();
+            pipelineObject.request_status = "FAILED";
+            pipelineObject.request_output_data = e;
+            if (!isViewReq)
                 pipeline.update({
                     _id: pipelineObject._id
                 }, pipelineObject, (er, su) => {
@@ -59,19 +63,18 @@ module.exports = {
                     });
 
                 });
-                else
+            else
                 return res.status(200).send({
                     success: false,
-                    message: 'Operation is failedqqq.',
+                    message: 'Operation is failed.',
                     error_code: '[error ocurred while performing request but request is updated.]',
                     operation_data: pipelineObject
                 });
 
-            });
-        }
+        });
+
     },
     createRole: function (req, res) {
-        console.log(req.body);
         role.create({
             roleCode: req.body.roleCode,
             roleName: req.body.roleName,
@@ -99,12 +102,6 @@ module.exports = {
                 MasterData: data
             });
         });
-
-
-
-
-
-
     },
     initMasterData: function (req, res) {
 

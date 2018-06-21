@@ -1,4 +1,5 @@
 var express = require('express');
+var fs = require('fs');
 var router = express.Router();
 var pipeline = require('../models/requestPipeline');
 var jwt = require('jsonwebtoken'),
@@ -17,7 +18,14 @@ router.post('/', auth(), function (req, res) {
         request_callback_url: req.originalUrl,
         request_comments: req.headers['request_comments']
     };
-    if (factory[requestdata.request_type] != undefined) {
+
+    var balFunction = true;
+    try {
+        require('../business/' + requestdata.request_type);
+    } catch (error) {
+        balFunction = false;
+    }
+    if (factory[requestdata.request_type] != undefined || balFunction) {
         if (requestdata.request_type.indexOf('__view') != -1) {
             share.pipelineResolver(req, res, requestdata, true);
         } else {
