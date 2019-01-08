@@ -4,7 +4,7 @@
   "description": "webapi for angular app ",
   "main": "src/api.js",
   "scripts": {
-    "start": "node src/api.js",
+    "start": "node src/index.js",
     "dev": "nodemon src/index.js",
     "pm2":"node  node_modules/pm2/bin/pm2"
 
